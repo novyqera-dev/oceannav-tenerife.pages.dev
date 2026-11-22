@@ -1,4 +1,4 @@
-const CACHE='oceannav-v5';
+const CACHE='oceannav-v6';
 const MAP_CACHE='oceannav-map-v1';
 const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));

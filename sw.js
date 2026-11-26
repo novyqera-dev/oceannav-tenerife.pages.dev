@@ -1,4 +1,4 @@
-const CACHE='oceannav-v16-rc2';
+const CACHE='oceannav-v16-rc2-final';
 const CORE=['./','./index.html','./premium.css','./app.js','./nav-core.js','./professional.js','./connected.js','./coastal-core.js','./coastal-worker.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./vendor/leaflet.js','./vendor/leaflet.css','./vendor/images/marker-icon.png','./vendor/images/marker-icon-2x.png','./vendor/images/marker-shadow.png','./vendor/images/layers.png','./vendor/images/layers-2x.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('oceannav-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));

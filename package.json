@@ -1,0 +1,14 @@
+{
+  "name": "oceannav-pro",
+  "private": true,
+  "version": "16.0.0-rc.1",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check app.js && node --check professional.js && node --check nav-core.js && node --check connected.js && node --check sw.js && node --check worker.mjs && node --check coastal-core.js && node --check coastal-worker.js",
+    "dev": "python3 -m http.server 8765",
+    "build": "node scripts-build.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}

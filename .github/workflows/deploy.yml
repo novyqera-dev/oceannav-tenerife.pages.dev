@@ -1,33 +1,30 @@
-name: Deploy OceanNav
-
+name: Validate and deploy OceanNav PRO
 on:
   push:
-    branches: [main]
-    paths:
-      - 'index.html'
-      - 'manifest.webmanifest'
-      - 'sw.js'
-      - 'icon.svg'
-      - 'wrangler.jsonc'
-      - '.assetsignore'
+    branches: [main, feature/oceannav-pro]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 concurrency:
-  group: oceannav-production
+  group: oceannav-${{ github.ref_name }}
   cancel-in-progress: true
-
 jobs:
   deploy:
-    name: Deploy to Cloudflare Worker
+    name: Test and deploy Cloudflare Worker
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy static PWA
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - name: Deploy tested PWA
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
+          command: ${{ github.ref_name == 'main' && 'deploy' || 'versions upload --preview-alias oceanpro' }}

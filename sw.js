@@ -1,13 +1,8 @@
-const CACHE='oceannav-v13';
-const MAP_CACHE='oceannav-map-v1';
-const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg'];
+const CACHE='oceannav-v16-rc1';
+const CORE=['./','./index.html','./premium.css','./app.js','./nav-core.js','./professional.js','./connected.js','./coastal-core.js','./coastal-worker.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./vendor/leaflet.js','./vendor/leaflet.css','./vendor/images/marker-icon.png','./vendor/images/marker-icon-2x.png','./vendor/images/marker-shadow.png','./vendor/images/layers.png','./vendor/images/layers-2x.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE&&key!==MAP_CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',event=>{
- if(event.request.method!=='GET')return;
- const url=new URL(event.request.url);
- const tile=url.hostname.endsWith('tile.openstreetmap.org');
- if(tile){event.respondWith(caches.open(MAP_CACHE).then(c=>c.match(event.request.url)).then(hit=>hit||fetch(event.request).then(r=>{caches.open(MAP_CACHE).then(c=>c.put(event.request.url,r.clone()));return r})).catch(()=>caches.match(event.request.url)));return}
- if(url.origin!==self.location.origin)return;
- event.respondWith(fetch(event.request).then(response=>{if(response.ok)caches.open(CACHE).then(cache=>cache.put(event.request,response.clone()));return response}).catch(()=>caches.match(event.request)));
-});
+self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('oceannav-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;const url=new URL(event.request.url);if(url.origin!==self.location.origin||url.pathname.includes('/api/'))return;
+const base=new URL('./',self.location.href);let relative=url.pathname.slice(base.pathname.length);if(!CORE.some(x=>x.replace('./','')===relative)&&!event.request.mode.includes('navigate'))return;
+if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).then(response=>{if(response.ok){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put(new URL('./index.html',base),copy)))}return response}).catch(()=>caches.match(new URL('./index.html',base))));return}
+event.respondWith(caches.open(CACHE).then(async cache=>await cache.match(event.request)||fetch(event.request).then(response=>{if(response.ok)event.waitUntil(cache.put(event.request,response.clone()));return response})))});
